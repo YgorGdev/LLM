@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat com IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet"> <!-- Fonte Roboto -->
+    <!-- Link para o FontAwesome (para ícones) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Roboto", sans-serif;
+            background-color: #f4f7fa;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 800px;
+            height: 80vh;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 70px; /* Adicionando uma margem inferior para não cobrir o botão */
+        }
+
+        h1 {
+            font-size: 28px;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(90deg, #6a82fb, #fc5c7d);
+            color: transparent;
+            font-weight: 500;
+            background-clip: text;
+            -webkit-background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: #f4f7fa;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .message {
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            font-size: 16px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .user-message {
+            background-color: #e1f5fe;
+            align-self: flex-end;
+            border-top-left-radius: 0;
+        }
+
+        .ai-message {
+            background-color: #f1f1f1;
+            align-self: flex-start;
+            border-top-right-radius: 0;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-top: 1px solid #ddd;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #6a82fb;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #6a82fb;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #4a66d4;
+        }
+
+        .restart-button {
+            margin-top: 15px;
+            padding: 12px 25px;
+            background: linear-gradient(90deg, #6a82fb, #fc5c7d);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            align-self: center;
+            transition: background-color 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .restart-button:hover {
+            background-color: #4a66d4;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .ai-message strong {
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px 0;
+            font-size: 14px;
+            color: #888;
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            background-color: #ffffff;
+            border-top: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer span {
+            margin-bottom: 10px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
+            color: #6a82fb;
+            font-size: 24px;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            color: #4a66d4;
+        }
+    </style>
+    <script>
+        async function sendMessage(event) {
+            event.preventDefault();
+            const userInput = document.getElementById("user_input").value;
+            const messagesContainer = document.getElementById("messages");
+
+            const userMessage = document.createElement("div");
+            userMessage.classList.add("message", "user-message");
+            userMessage.textContent = userInput;
+            messagesContainer.appendChild(userMessage);
+
+            document.getElementById("user_input").value = "";
+
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `user_input=${userInput}` 
+            });
+            const data = await response.json();
+
+            const aiMessage = document.createElement("div");
+            aiMessage.classList.add("message", "ai-message");
+
+            aiMessage.innerHTML = data.message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            messagesContainer.appendChild(aiMessage);
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function restartChat() {
+            const messagesContainer = document.getElementById("messages");
+            messagesContainer.innerHTML = '';
+            document.getElementById("user_input").value = '';
+        }
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Chat com IA</h1>
+        <div class="messages" id="messages"></div>
+        <form onsubmit="sendMessage(event)">
+            <div class="input-container">
+                <input type="text" id="user_input" placeholder="Digite sua mensagem..." required>
+                <button type="submit">Enviar</button>
+            </div>
+        </form>
+        <button class="restart-button" onclick="restartChat()">Iniciar Novo Chat</button>
+    </div>
+
+    <div class="footer">
+        <span>Feito por Ygor GDev</span>
+        <div class="social-links">
+            <a href="https://www.linkedin.com/in/ygor-gomes-6a9898267/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://www.instagram.com/_ygukkj/" target="_blank" title="Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://github.com/YgorGDev" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
