@@ -5,7 +5,7 @@ import google.generativeai as genai
 app = Flask(__name__)
 
 # Substitua pela sua chave de API correta
-api_key = "AIzaSyDGIqK2m4_Q4Euxpxb2y-1LQFhpsWW6TtQ"
+api_key = "Adicione a sua API AQUI"
 genai.configure(api_key=api_key)
 
 # Configuração do modelo
